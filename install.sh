@@ -11,7 +11,8 @@ function install_mpd2chromecast {
     # GIT repo
     echo "Downloading mpd2chromecast..."
     rm -rf mpd2chromecast
-    git clone https://github.com/dresdner353/mpd2chromecast.git
+    git clone https://github.com/bonelifer/mpd2chromecast.git
+    git checkout generic
 
     # Purge old entries from crontab if cron is installed
     if [[ -f /usr/sbin/cron ]]
@@ -35,9 +36,9 @@ then
 fi
 
 # Determine the variant and then non-root user
-# only supports Volumio and moOde at present
+# supports Volumio, moOde, and generic installations
 VOLUMIO_CHECK=/usr/local/bin/volumio		
-MOODE_CHECK=/usr/local/bin/moodeutl		
+MOODE_CHECK=/usr/local/bin/moodeutl
 
 if [[ -f ${VOLUMIO_CHECK} ]]
 then
@@ -48,11 +49,10 @@ then
     HOME_USER=pi
     HOME_DIR=/home/pi
 else
-    echo "Cannot determine variant (volumio or moOde)"
-    exit 1
+    HOME_USER=$(getent passwd 1000 | cut -d: -f1)
+    HOME_DIR=/home/${HOME_USER}
 fi
-echo "Detected home user:${HOME_USER}"
-
+echo "Detected home user: ${HOME_USER}"
 
 # install packages
 apt-get update
@@ -73,3 +73,4 @@ cp /tmp/mpd2chromecast.service /etc/systemd/system
 systemctl daemon-reload
 systemctl enable mpd2chromecast
 systemctl restart mpd2chromecast
+
